@@ -1,0 +1,45 @@
+---
+start date: 4/21/2021
+authors: Grant Armstrong, Aatika Rizwan, Damon Luk, Rishab Ayyappath, Jeremy Amand
+title: "KickStarter DataMining"
+output: html_notebook
+---
+olumns of interest include launched, state, main_category, category, deadline, backers, and country
+ 
+Aatika - Import Data & Clean (remove all state='live' and 'canceled' rows)
+```{r}
+raw<-read.csv("https://www.kaggle.com/kemical/kickstarter-projects?select=ks-projects-201801.csv")
+```
+
+supervised classification method 1 -predicting the value of the ‘state’ column (whether or not the project succeeds) based on values of other attributes.
+Grant & Damon - Naive Bayes w/ 10 fold cross validation
+```{r}
+
+
+```
+
+Performance of Naive Bayes
+```{r}
+
+```
+
+
+We are thinking of using a decision tree as another classification method 
+to visualize the values of attributes that lead to success or failure
+Jeremy & Rishab
+```{r}
+
+```
+
+Performance of DT
+```{r}
+
+
+```
+
+Aatika
+Word Cloud of Successful Project Names
+```{r}
+
+```
+
