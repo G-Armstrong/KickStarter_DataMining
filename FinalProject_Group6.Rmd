@@ -4,9 +4,10 @@ authors: Grant Armstrong, Aatika Rizwan, Damon Luk, Rishab Ayyappath, Jeremy Ama
 title: "KickStarter DataMining"
 output: html_notebook
 ---
-olumns of interest include launched, state, main_category, category, deadline, backers, and country
+Columns of interest include launched, state, main_category, category, deadline, backers, and country
  
-Aatika - Import Data & Clean (remove all state='live' and 'canceled' rows)
+Aatika - Import Data & Clean (remove all state='live' and 'canceled' rows) Make sure CSV is readable from the internet so we dont need
+to keep it locally in our repository 
 ```{r}
 raw<-read.csv("https://www.kaggle.com/kemical/kickstarter-projects?select=ks-projects-201801.csv")
 ```
@@ -14,13 +15,43 @@ raw<-read.csv("https://www.kaggle.com/kemical/kickstarter-projects?select=ks-pro
 supervised classification method 1 -predicting the value of the ‘state’ column (whether or not the project succeeds) based on values of other attributes.
 Grant & Damon - Naive Bayes w/ 10 fold cross validation
 ```{r}
+precisions<-c() #for storing performance measures for all 10 models
+recalls<-c()
+accuracies<-c()
 
+#Randomly shuffle the data
+yourData<-yourData[sample(nrow(yourData)),]
+
+#Create 10 equally size folds
+folds <- cut(seq(1,nrow(yourData)),breaks=10,labels=FALSE)
+
+#Perform 10 fold cross validation
+for(i in 1:10){
+    #Segement your data by fold using the which() function 
+    testIndexes <- which(folds==i,arr.ind=TRUE)
+    testData <- yourData[testIndexes, ]
+    trainData <- yourData[-testIndexes, ]
+    
+    
+    #Use the test and train data partitions however you desire...
+    classifier <- naiveBayes(trainData[,2:10], trainData[,11])
+    tab<-table(predict(classifier, testData[,-11]), testData[,11])
+    
+    accuracies<-c(accuracies,(tab[1] + tab[4]) /(tab[1] + tab[3] + tab[4] +tab[2]))
+    precisions<-c(precisions, tab[1][1]/(tab[1][1] + tab[3]) )
+    recalls<-c(recalls,tab[1][1]/(tab[1][1] + tab[2][1]))
+}
 
 ```
 
 Performance of Naive Bayes
 ```{r}
-
+print("Average Precision:")
+sum(precisions) /10
+print("Average Recall:" )
+sum(recalls) /10
+print("Average Accuracy:" )
+sum(accuracies) /10
 ```
 
 
@@ -36,6 +67,13 @@ Performance of DT
 
 
 ```
+
+
+ROCR comparing Naive-Bayes to DT
+```{r}
+
+```
+
 
 Aatika
 Word Cloud of Successful Project Names

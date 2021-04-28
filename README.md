@@ -10,3 +10,17 @@ Columns of interest include launched, state, main_category, category, deadline, 
 **Target Customers:** This project would be targeted towards individuals that want to post on Kickstarter with the knowledge of what makes a project succeed on the platform. Another use of this project could be for people who are interested in backing or investing into a Kickstarter project, as seeing its prospective state might draw more people in.
  
 **Operation:** We will primarily be using supervised classification methods. One task of interest is predicting the value of the ‘state’ column (whether or not the project succeeds) based on values of other attributes. We are thinking of using a decision tree to visualize the values of attributes that lead to success or failure. To clean the data, we will remove the ongoing/live projects but consider the canceled projects as either its own classification to be predicted or simply as a failure.
+
+**Aatika Rizwan**
+Import & Clean Data making sure CSV is readable from the internet
+Write 1 page executive summary 
+Word Cloud of Successful Project Names
+
+**Grant Armstrong & Damon Luk**
+Naive-Bayes classification w/ 10 fold cross validation
+ROCR Graph of Naives-Bayes and DT performance for Discussion section of write up
+Write related section of Methods and Results
+
+**Rishab Ayyappath & Jeremy Amand**
+Decision Tree (DT) classificaiton to visualize the values of attributes that lead to success or failure
+Write related section of Methods and Results
