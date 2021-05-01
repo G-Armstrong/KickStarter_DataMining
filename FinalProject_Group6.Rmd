@@ -15,31 +15,47 @@ raw<-read.csv("https://www.kaggle.com/kemical/kickstarter-projects?select=ks-pro
 supervised classification method 1 -predicting the value of the ‘state’ column (whether or not the project succeeds) based on values of other attributes.
 Grant & Damon - Naive Bayes w/ 10 fold cross validation
 ```{r}
-precisions<-c() #for storing performance measures for all 10 models
-recalls<-c()
-accuracies<-c()
+#empty vectors to store everything
+precisionsVec<-vector() #for storing performance measures for all 10 models
+recallsVec<-vector()
+accuracyVec<-vector()
+fmeasureVec<-vector()
 
 #Randomly shuffle the data
-yourData<-yourData[sample(nrow(yourData)),]
+set.seed(88) #set seed so we can replicate our reults every time
+shuffledData<-yourData[sample(nrow(yourData)),]
 
-#Create 10 equally size folds
-folds <- cut(seq(1,nrow(yourData)),breaks=10,labels=FALSE)
+# Divide dataset by 10 for ten folds, start rowCount counter at 1
+partitionSize <- round(nrow(yourData)/10) - 1
+print(partitionSize) 
+rowCount <- 1
 
 #Perform 10 fold cross validation
 for(i in 1:10){
-    #Segement your data by fold using the which() function 
-    testIndexes <- which(folds==i,arr.ind=TRUE)
-    testData <- yourData[testIndexes, ]
-    trainData <- yourData[-testIndexes, ]
-    
-    
+    # Upperbound is basically rowCount + fold/partition size
+    upperBound <- min(rowCount + partitionSize, nrow(shuffledData))
+    testData <- shuffledData[rowCount:upperBound,]
+    trainData <- shuffledData[-(rowCount:upperBound),]
+
     #Use the test and train data partitions however you desire...
     classifier <- naiveBayes(trainData[,2:10], trainData[,11])
+    #confusion matrix 
     tab<-table(predict(classifier, testData[,-11]), testData[,11])
     
-    accuracies<-c(accuracies,(tab[1] + tab[4]) /(tab[1] + tab[3] + tab[4] +tab[2]))
-    precisions<-c(precisions, tab[1][1]/(tab[1][1] + tab[3]) )
-    recalls<-c(recalls,tab[1][1]/(tab[1][1] + tab[2][1]))
+    #calculating performance measures
+    accuracy <- sum(diag(tab))/sum(tab)
+    precision <- tab[1,1] / sum(tab[1,]) # Precision = TP / (TP + FP)
+    recall <- tab[1,1] / sum(tab[,1]) # Recall = TP / (TP + FN)
+    fmeasure <- 2 * precision * recall / (precision + recall)
+    
+    #adding performance measures in 
+    accuracyVec<-c(accuracyVec,accuracy)
+    precisionsVec<-c(precisionsVec, precision)
+    recallsVec<-c(recallsVec,recall)
+    fmeasureVec<-c(fmeasureVec, fmeasure )
+    
+    #Increment rowCount for next iteration
+    rowCount <- rowCount + partitionSize + 1
 }
 
 ```
@@ -47,11 +63,13 @@ for(i in 1:10){
 Performance of Naive Bayes
 ```{r}
 print("Average Precision:")
-sum(precisions) /10
+mean(precisionsVec)
 print("Average Recall:" )
-sum(recalls) /10
+mean(recallsvec)
 print("Average Accuracy:" )
-sum(accuracies) /10
+mean(accuracyVec)
+print("Average F-measure:")
+mean(fmeasureVec)
 ```
 
 
