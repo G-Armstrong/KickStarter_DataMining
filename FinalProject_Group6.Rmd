@@ -9,7 +9,12 @@ Columns of interest include launched, state, main_category, category, deadline, 
 Aatika - Import Data & Clean (remove all state='live' and 'canceled' rows) Make sure CSV is readable from the internet so we dont need
 to keep it locally in our repository 
 ```{r}
-raw<-read.csv("https://www.kaggle.com/kemical/kickstarter-projects?select=ks-projects-201801.csv")
+raw<-read.csv("ks-projects-201801.csv", header= TRUE)
+
+clean1 <- raw[raw$state != "live",]
+clean1 <- clean1[clean1$state != "canceled",]
+yourData <- clean1[clean1$state != "undefined",]
+
 ```
 
 supervised classification method 1 -predicting the value of the ‘state’ column (whether or not the project succeeds) based on values of other attributes.
