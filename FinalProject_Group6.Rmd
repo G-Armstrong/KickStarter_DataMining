@@ -20,6 +20,8 @@ yourData <- clean1[clean1$state != "undefined",]
 supervised classification method 1 -predicting the value of the ‘state’ column (whether or not the project succeeds) based on values of other attributes.
 Grant & Damon - Naive Bayes w/ 10 fold cross validation
 ```{r}
+library(e1071)
+
 #empty vectors to store everything
 precisionsVec<-vector() #for storing performance measures for all 10 models
 recallsVec<-vector()
