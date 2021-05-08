@@ -9,13 +9,23 @@ Columns of interest include launched, state, main_category, category, deadline, 
 Aatika - Import Data & Clean (remove all state='live' and 'canceled' rows) Make sure CSV is readable from the internet so we dont need
 to keep it locally in our repository 
 ```{r}
-raw<-read.csv("ks-projects-201801.csv", header= TRUE)
+raw<-read.csv("ks-projects-201801.csv", header= TRUE, stringsAsFactors = TRUE)
+
 
 clean1 <- raw[raw$state != "live",]
 clean1 <- clean1[clean1$state != "canceled",]
 clean1 <- clean1[clean1$state != "suspended",]
-yourData <- clean1[clean1$state != "undefined",]
+clean1$ID <- NULL
+clean1 <- clean1[clean1$state != "undefined",]
+clean1$launchToDate <- abs(as.Date(clean1[,"launched"])-as.Date(clean1[,"deadline"])) #days between launch and deadline
+clean1$deadline <- NULL
+clean1$launched <- NULL
 
+clean1$amountPerBacker <- clean1[,"pledged"]/(clean1[,"backers"]) #average amount spent by each backer
+clean1$pledged <- NULL
+clean1$backers <- NULL
+yourData <- clean1 # to preserve name column
+yourData$name <- NULL
 ```
 
 supervised classification method 1 -predicting the value of the ‘state’ column (whether or not the project succeeds) based on values of other attributes.
@@ -46,9 +56,9 @@ for(i in 1:10){
     trainData <- shuffledData[-(rowCount:upperBound),]
 
     #Use the test and train data partitions however you desire...
-    classifier <- naiveBayes(trainData[,2:10], trainData[,11])
+    classifier <- naiveBayes(trainData[,-6], trainData[,6])
     #confusion matrix 
-    tab<-table(predict(classifier, testData[,-11]), testData[,11])
+    tab<-table(predict(classifier, testData[,-6]), testData[,6])
     
     #calculating performance measures
     accuracy <- sum(diag(tab))/sum(tab)
@@ -96,8 +106,8 @@ set.seed(88) #for consistent results
 
 yourData <- yourData[sample(nrow(yourData)),] #shuffle data
 
-yourData$launchToDate <- abs(as.Date(yourData[,"launched"])-as.Date(yourData[,"deadline"])) #days between launch and deadline
-yourData$amountPerBacker <- yourData[,"pledged"]/(yourData[,"backers"]) #average amount spent by each backer
+#yourData$launchToDate <- abs(as.Date(yourData[,"launched"])-as.Date(yourData[,"deadline"])) #days between launch and deadline
+#yourData$amountPerBacker <- yourData[,"pledged"]/(yourData[,"backers"]) #average amount spent by each backer
 folds <- cut(seq(1,nrow(yourData)),breaks=10,labels=FALSE) #split data into 10 folds
 #performance metrics
 dtprecision=0
