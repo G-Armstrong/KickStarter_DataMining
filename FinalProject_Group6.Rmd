@@ -29,7 +29,7 @@ accuracyVec<-vector()
 fmeasureVec<-vector()
 
 #Randomly shuffle the data
-set.seed(88) #set seed so we can replicate our reults every time
+set.seed(88) #set seed so we can replicate our results every time
 shuffledData<-yourData[sample(nrow(yourData)),]
 
 # Divide dataset by 10 for ten folds, start rowCount counter at 1
