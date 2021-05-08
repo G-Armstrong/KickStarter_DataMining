@@ -24,6 +24,12 @@ clean1$launched <- NULL
 clean1$amountPerBacker <- clean1[,"pledged"]/(clean1[,"backers"]) #average amount spent by each backer
 clean1$pledged <- NULL
 clean1$backers <- NULL
+clean1$difmoney <- clean1$goal - clean1$usd.pledged # the lower the better? 
+
+clean1$usd_goal_real <- NULL 
+clean1$usd_pledged_real <- NULL
+clean1$goal <- NULL
+clean1$usd.pledged <-NULL 
 yourData <- clean1 # to preserve name column
 yourData$name <- NULL
 ```
@@ -83,7 +89,7 @@ Performance of Naive Bayes
 print("Average Precision:")
 mean(precisionsVec)
 print("Average Recall:" )
-mean(recallsvec)
+mean(recallsVec)
 print("Average Accuracy:" )
 mean(accuracyVec)
 print("Average F-measure:")
