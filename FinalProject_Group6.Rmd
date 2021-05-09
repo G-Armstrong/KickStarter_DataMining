@@ -117,7 +117,7 @@ library(rpart.plot)
 set.seed(88) #for consistent results
 
 yourData <- yourData[sample(nrow(yourData)),] #shuffle data
-
+yourData <- yourData[1:5000,]
 #yourData$launchToDate <- abs(as.Date(yourData[,"launched"])-as.Date(yourData[,"deadline"])) #days between launch and deadline
 #yourData$amountPerBacker <- yourData[,"pledged"]/(yourData[,"backers"]) #average amount spent by each backer
 folds <- cut(seq(1,nrow(yourData)),breaks=10,labels=FALSE) #split data into 10 folds
@@ -136,8 +136,8 @@ for(i in 1:10){
   dtprediction <- predict(tree,testing,type="class")
   dtcm <- table(testing$state,dtprediction)
   #performance metrics
-  dtprecision <- (dtprecision*(i-1)+(dtcm[1,1]/sum(dtcm[1,])))/i
-  dtrecall <- (dtrecall*(i-1)+(dtcm[1,1]/sum(dtcm[,1])))/i
+  dtprecision <- (dtprecision*(i-1)+(dtcm["successful","successful"]/sum(dtcm["successful",])))/i
+  dtrecall <- (dtrecall*(i-1)+(dtcm["successful","successful"]/sum(dtcm[,"successful"])))/i
   dtaccuracy <- (dtaccuracy*(i-1)+(sum(diag(dtcm))/sum(dtcm)))/i
   dtfmeasure <- (dtfmeasure*(i-1)+(2*dtprecision*dtrecall)/(dtprecision+dtrecall))/i
 }
