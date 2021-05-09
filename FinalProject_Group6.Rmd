@@ -29,12 +29,14 @@ clean1 <- clean1[!is.nan(clean1$amountPerBacker) ,] #remove rows that do not hav
 
 clean1$pledged <- NULL #not needed for predicting
 clean1$backers <- NULL #same
-clean1$difmoney <- clean1$goal - clean1$usd.pledged # the lower the better? 
+clean1$difmoney <- clean1$usd.pledged - clean1$goal # the lower the better? 
 
 clean1$usd_goal_real <- NULL  #omitted
 clean1$usd_pledged_real <- NULL #omitted
 #clean1$goal <- NULL #not needed after above calc
 clean1$usd.pledged <-NULL  #same
+clean1$category <- NULL
+clean1$currency <- NULL
 clean1 <- na.omit(clean1)
 yourData <- clean1 # to preserve name column
 yourData$name <- NULL #not needed for prediction
@@ -42,67 +44,6 @@ yourData$name <- NULL #not needed for prediction
 
 supervised classification method 1 -predicting the value of the ‘state’ column (whether or not the project succeeds) based on values of other attributes.
 Grant & Damon - Naive Bayes w/ 10 fold cross validation
-```{r}
-library(e1071)
-
-#empty vectors to store everything
-precisionsVec<-vector() #for storing performance measures for all 10 models
-recallsVec<-vector()
-accuracyVec<-vector()
-fmeasureVec<-vector()
-
-#Randomly shuffle the data
-set.seed(88) #set seed so we can replicate our results every time
-shuffledData<-yourData[sample(nrow(yourData)),]
-
-# Divide dataset by 10 for ten folds, start rowCount counter at 1
-partitionSize <- round(nrow(yourData)/10) - 1
-print(partitionSize) 
-rowCount <- 1
-
-#Perform 10 fold cross validation
-for(i in 1:10){
-    # Upperbound is basically rowCount + fold/partition size
-    upperBound <- min(rowCount + partitionSize, nrow(shuffledData))
-    testData <- shuffledData[rowCount:upperBound,]
-    trainData <- shuffledData[-(rowCount:upperBound),]
-
-    #Use the test and train data partitions however you desire...
-    classifier <- naiveBayes(trainData[,-5],trainData[,"state"])
-    #confusion matrix 
-    pred = predict(classifier, testData, type = "class")
-    tab <- table(pred, testData$state)
-    
-    #calculating performance measures
-    accuracy <- sum(diag(tab))/sum(tab)
-    precision <- tab["successful","successful"] / sum(tab["successful",]) # Precision = TP / (TP + FP)
-    recall <- tab["successful","successful"] / sum(tab[,"successful"]) # Recall = TP / (TP + FN)
-    fmeasure <- 2 * precision * recall / (precision + recall)
-    
-    #adding performance measures in 
-    accuracyVec<-c(accuracyVec,accuracy)
-    precisionsVec<-c(precisionsVec, precision)
-    recallsVec<-c(recallsVec,recall)
-    fmeasureVec<-c(fmeasureVec, fmeasure )
-    
-    #Increment rowCount for next iteration
-    rowCount <- rowCount + partitionSize + 1
-}
-
-```
-
-Performance of Naive Bayes
-```{r}
-print("Average Precision:")
-mean(precisionsVec)
-print("Average Recall:" )
-mean(recallsVec)
-print("Average Accuracy:" )
-mean(accuracyVec)
-print("Average F-measure:")
-mean(fmeasureVec)
-```
-
 
 We are thinking of using a decision tree as another classification method 
 to visualize the values of attributes that lead to success or failure
@@ -119,6 +60,7 @@ library(e1071)
 set.seed(88) #for consistent results
 
 yourData <- yourData[sample(nrow(yourData)),] #shuffle data
+yourData <- yourData[1:100000,]
 #yourData$launchToDate <- abs(as.Date(yourData[,"launched"])-as.Date(yourData[,"deadline"])) #days between launch and deadline
 #yourData$amountPerBacker <- yourData[,"pledged"]/(yourData[,"backers"]) #average amount spent by each backer
 folds <- cut(seq(1,nrow(yourData)),breaks=10,labels=FALSE) #split data into 10 folds
@@ -136,7 +78,7 @@ for(i in 1:10){
   index <- which(folds==i,arr.ind=TRUE)
   training <- yourData[-index,]
   testing <- yourData[index,]
-  tree <- rpart(state~goal+main_category+launchToDate+amountPerBacker+country,data=training,method="class") #dt based off of 5 categories
+  tree <- rpart(state~.,data=training,method="class") #dt based off of 5 categories
   #get prediction and confusion matrix
   dtprediction <- predict(tree,testing,type="class")
   dtcm <- table(testing$state,dtprediction)
@@ -146,15 +88,13 @@ for(i in 1:10){
   dtaccuracy <- (dtaccuracy*(i-1)+(sum(diag(dtcm))/sum(dtcm)))/i
   dtfmeasure <- (dtfmeasure*(i-1)+(2*dtprecision*dtrecall)/(dtprecision+dtrecall))/i
   
-  nb <- naiveBayes(training[,-5],training[,"state"])
-  #nb <- naiveBayes(state~)
-  nbprediction <- predict(nb,testing,type="class")
-  nbcm <- table(testing$state,nbprediction)
-  nbprecision <- (nbprecision*(i-1)+(nbcm["successful","successful"]/sum(nbcm["successful",])))/i
-  nbrecall <- (nbrecall*(i-1)+(nbcm["successful","successful"]/sum(nbcm[,"successful"])))/i
-  nbaccuracy <- (nbaccuracy*(i-1)+(sum(diag(nbcm))/sum(nbcm)))/i
-  nbfmeasure <- (nbfmeasure*(i-1)+(2*nbprecision*nbrecall)/(nbprecision+nbrecall))/i
-  nbcm
+  #nb <- naiveBayes(training[,-3],training[,"state"])
+  #nbprediction <- predict(nb,testing,type="class")
+  #nbcm <- table(testing$state,nbprediction)
+  #nbprecision <- (nbprecision*(i-1)+(nbcm["successful","successful"]/sum(nbcm["successful",])))/i
+  #nbrecall <- (nbrecall*(i-1)+(nbcm["successful","successful"]/sum(nbcm[,"successful"])))/i
+  #nbaccuracy <- (nbaccuracy*(i-1)+(sum(diag(nbcm))/sum(nbcm)))/i
+  #nbfmeasure <- (nbfmeasure*(i-1)+(2*nbprecision*nbrecall)/(nbprecision+nbrecall))/i
 }
 ```
 
@@ -216,3 +156,4 @@ plot(bayesPerfROC, col=3, add=TRUE)
 
 
 
+clean1$ID <- NULL # not needed for prediction
