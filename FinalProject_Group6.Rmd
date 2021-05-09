@@ -16,6 +16,7 @@ clean1 <- clean1[clean1$state != "canceled",]
 clean1 <- clean1[clean1$state != "suspended",]
 clean1$ID <- NULL # not needed for prediction
 clean1 <- clean1[clean1$state != "undefined",]
+clean1$state <- droplevels(clean1$state, exclude = "live")
 
 clean1$ID <- NULL # ID are not needed to predict on 
 
@@ -178,13 +179,13 @@ print("Average F-measure:")
 nbfmeasure
 ```
 
-
+Aatika
 ROCR comparing Naive-Bayes to DT
 ```{r}
 library(caTools)
 library(ROCR)
 
-set.seed(88)
+set.seed(88)  
 
 split <- sample.split(yourData$state, SplitRatio = 0.8)
 train <- subset(yourData, split == TRUE)
@@ -194,9 +195,18 @@ test <- subset(yourData, split == FALSE)
 # Use the model to predict the test set
 #glm.probs <- predict(glm.fit, newdata=test, type="response")
 
+tree <- rpart(state~goal+main_category+launchToDate+amountPerBacker+country, data=train, method="class") #dt based off of 5 categories
+  #get prediction and confusion matrix
+dtprediction <- predict(tree, newdata=test ,type="class")
+
 dtPredROC <- prediction(dtprediction, test$state)
 dtPerfROC <- performance(dtPredROC, 'tpr', 'fpr')
 plot(dtPerfROC, col=2, text.adj = c(-0.2, 1.7), main="ROC Curve")
+
+train$goal <-NULL
+test$goal <-NULL
+classifier <- naiveBayes(state ~. , data=train)
+pred = predict(classifier, test, type="raw")
 
 bayesPredROC <- prediction(pred[,2], test$state)
 bayesPerfROC <- performance(bayesPredROC, 'tpr', 'fpr')
