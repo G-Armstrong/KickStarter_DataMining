@@ -159,13 +159,27 @@ dtfmeasure
 
 ROCR comparing Naive-Bayes to DT
 ```{r}
+library(caTools)
+library(ROCR)
 
+set.seed(88)
+
+split <- sample.split(yourData$state, SplitRatio = 0.8)
+train <- subset(yourData, split == TRUE)
+test <- subset(yourData, split == FALSE)
+
+#glm.fit <- glm(class ~ ., data = train, family = binomial)
+# Use the model to predict the test set
+#glm.probs <- predict(glm.fit, newdata=test, type="response")
+
+dtPredROC <- prediction(dtprediction, test$state)
+dtPerfROC <- performance(dtPredROC, 'tpr', 'fpr')
+plot(dtPerfROC, col=2, text.adj = c(-0.2, 1.7), main="ROC Curve")
+
+bayesPredROC <- prediction(pred[,2], test$state)
+bayesPerfROC <- performance(bayesPredROC, 'tpr', 'fpr')
+plot(bayesPerfROC, col=3, add=TRUE)
 ```
 
 
-Aatika
-Word Cloud of Successful Project Names
-```{r}
-
-```
 
