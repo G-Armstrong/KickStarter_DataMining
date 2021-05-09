@@ -9,9 +9,13 @@ Columns of interest include launched, state, main_category, category, deadline, 
 Aatika - Import Data & Clean (remove all state='live' and 'canceled' rows) 
 ```{r}
 raw<-read.csv("ks-projects-201801.csv", header= TRUE, stringsAsFactors = TRUE) # read in local file
-clean1 <- raw[raw$state %in% c("failed", "successful"),] #only want data that is confimed fail or success
+#clean1 <- raw[raw$state %in% c("failed", "successful"),] #only want data that is confimed fail or success
 
-clean1 <- na.omit(clean1)
+clean1 <- raw[raw$state != "live",]
+clean1 <- clean1[clean1$state != "canceled",]
+clean1 <- clean1[clean1$state != "suspended",]
+clean1$ID <- NULL # not needed for prediction
+clean1 <- clean1[clean1$state != "undefined",]
 
 clean1$ID <- NULL # ID are not needed to predict on 
 
@@ -28,8 +32,9 @@ clean1$difmoney <- clean1$goal - clean1$usd.pledged # the lower the better?
 
 clean1$usd_goal_real <- NULL  #omitted
 clean1$usd_pledged_real <- NULL #omitted
-clean1$goal <- NULL #not needed after above calc
+#clean1$goal <- NULL #not needed after above calc
 clean1$usd.pledged <-NULL  #same
+clean1 <- na.omit(clean1)
 yourData <- clean1 # to preserve name column
 yourData$name <- NULL #not needed for prediction
 ```
