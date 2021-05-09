@@ -6,10 +6,12 @@ output: html_notebook
 ---
 Columns of interest include launched, state, main_category, category, deadline, backers, and country
  
-Aatika - Import Data & Clean (remove all state='live' and 'canceled' rows) Make sure CSV is readable from the internet so we dont need
-to keep it locally in our repository 
+Aatika - Import Data & Clean (remove all state='live' and 'canceled' rows) 
 ```{r}
-raw<-read.csv("ks-projects-201801.csv", header= TRUE, stringsAsFactors = TRUE)
+
+library(tidyverse)
+
+raw<-read.csv("ks-projects-201801.csv", header= TRUE, stringsAsFactors = TRUE) # read in local file
 
 
 clean1 <- raw[raw$state != "live",]
