@@ -127,7 +127,7 @@ library(caTools)
 library(ROCR)
 
 set.seed(88)  
-
+yourData <- yourData[1:50000,]
 split <- sample.split(yourData$state, SplitRatio = 0.8)
 train <- subset(yourData, split == TRUE)
 test <- subset(yourData, split == FALSE)
@@ -138,16 +138,17 @@ test <- subset(yourData, split == FALSE)
 
 tree <- rpart(state~goal+main_category+launchToDate+amountPerBacker+country, data=train, method="class") #dt based off of 5 categories
   #get prediction and confusion matrix
-dtprediction <- predict(tree, newdata=test ,type="class")
+dtprediction <- predict(tree,test,type="vector")
 
 dtPredROC <- prediction(dtprediction, test$state)
 dtPerfROC <- performance(dtPredROC, 'tpr', 'fpr')
 plot(dtPerfROC, col=2, text.adj = c(-0.2, 1.7), main="ROC Curve")
 
-train$goal <-NULL
-test$goal <-NULL
-classifier <- naiveBayes(state ~. , data=train)
-pred = predict(classifier, test, type="raw")
+#train$goal <-NULL
+#test$goal <-NULL
+#classifier <- naiveBayes(state ~. , data=train)
+nb <- naiveBayes(train[,-3],train[,"state"])
+pred <- predict(nb, test, type="raw")
 
 bayesPredROC <- prediction(pred[,2], test$state)
 bayesPerfROC <- performance(bayesPredROC, 'tpr', 'fpr')
